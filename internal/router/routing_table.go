@@ -1,6 +1,11 @@
 package router
 
-import "github.com/lorenzhoerb/vroute/internal/topology"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/lorenzhoerb/vroute/internal/topology"
+)
 
 type Route struct {
 	Destination topology.NodeID
@@ -10,38 +15,18 @@ type Route struct {
 
 type RoutingTale map[topology.NodeID]Route
 
-func (r *Router) RecomputeRoutingTable() error {
-	r.rebuildGraph()
-
-	paths, err := r.algo.ComputeShortestPaths(r.graph, r.id)
-	if err != nil {
-		return err
-	}
-
-	table := make(RoutingTale)
-
-	for dest, info := range paths {
-		if dest == r.id || info.PrevNode == nil {
-			continue
-		}
-
-		nextHop := dest
-		for paths[nextHop].PrevNode.ID != r.id {
-			nextHop = paths[nextHop].PrevNode.ID
-		}
-
-		table[dest] = Route{
-			Destination: dest,
-			NextHop:     nextHop,
-			Cost:        info.Cost,
-		}
-
-		r.routingTale = table
-	}
-
-	return nil
-}
-
 func (r *Router) RoutingTable() RoutingTale {
 	return r.routingTale
+}
+
+func (r RoutingTale) String() string {
+	if len(r) == 0 {
+		return "<empty>"
+	}
+
+	var sb strings.Builder
+	for dest, route := range r {
+		sb.WriteString(fmt.Sprintf("To %s via %s cost %.2f\n", dest, route.NextHop, route.Cost))
+	}
+	return sb.String()
 }

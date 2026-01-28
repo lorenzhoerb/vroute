@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/lorenzhoerb/vroute/internal/algorithm"
+	"github.com/lorenzhoerb/vroute/internal/message"
 	"github.com/lorenzhoerb/vroute/internal/router"
 )
 
@@ -25,14 +26,18 @@ func main() {
 	for _, r := range routers {
 		for _, other := range routers {
 			if r != other {
-				other.ReceiveLSA(r.ID(), r.Neighbors())
+				other.ReceiveLSA(message.LSA{
+					Origin:   r.ID(),
+					Sequence: 0,
+					Links:    r.Neighbors(),
+				})
 			}
 		}
 	}
 
 	// compute tables
 	for _, r := range routers {
-		if err := r.RecomputeRoutingTable(); err != nil {
+		if err := r.Recompute(); err != nil {
 			panic(err)
 		}
 	}

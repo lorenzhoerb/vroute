@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/lorenzhoerb/vroute/internal/algorithm"
+	"github.com/lorenzhoerb/vroute/internal/message"
 	"github.com/lorenzhoerb/vroute/internal/topology"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,14 +29,18 @@ func TestRoutingExample(t *testing.T) {
 	for _, r := range routers {
 		for _, other := range routers {
 			if r != other {
-				other.ReceiveLSA(r.ID(), r.Neighbors())
+				other.ReceiveLSA(message.LSA{
+					Origin:   r.id,
+					Sequence: 0,
+					Links:    r.Neighbors(),
+				})
 			}
 		}
 	}
 
 	// compute routing tables
 	for _, r := range routers {
-		if err := r.RecomputeRoutingTable(); err != nil {
+		if err := r.Recompute(); err != nil {
 			t.Fatal(err)
 		}
 	}
