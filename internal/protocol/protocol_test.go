@@ -81,6 +81,10 @@ func TestProtocol(t *testing.T) {
 	fmt.Print(rc.RoutingTable())
 	fmt.Println()
 
+	fmt.Println("Router D - Routing Table")
+	fmt.Print(rd.RoutingTable())
+	fmt.Println()
+
 	pa.SendData("D", "hello world")
 
 }
